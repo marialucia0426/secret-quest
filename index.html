@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Sacred Quest</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+body{
+    margin:0;
+    background:#121212;
+    color:#ffe6f2;
+    font-family:'Press Start 2P', monospace;
+    overflow:hidden;
+}
+
+/* Progress bar */
+#progressBar{
+    position:fixed;
+    top:0;
+    left:0;
+    height:6px;
+    width:0%;
+    background:#ff4f9a;
+    transition:width 0.5s;
+}
+
+/* Screens */
+.screen{
+    display:none;
+    position:absolute;
+    width:100%;
+    height:100vh;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    text-align:center;
+    opacity:0;
+    transition:opacity 1s;
+}
+
+.screen.active{
+    display:flex;
+    opacity:1;
+}
+
+h1{
+    max-width:700px;
+    padding:20px;
+    line-height:1.4;
+}
+
+/* Buttons */
+button{
+    padding:12px 24px;
+    margin:8px;
+    font-size:14px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#ff7eb9;
+    color:white;
+}
+
+button:hover{
+    background:#ff4f9a;
+}
+
+.yesButton{
+    font-size:18px;
+    padding:16px 32px;
+    animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+    0%{box-shadow:0 0 10px #ff4f9a;}
+    50%{box-shadow:0 0 25px #ff4f9a;}
+    100%{box-shadow:0 0 10px #ff4f9a;}
+}
+
+.tinyNo{
+    font-size:9px;
+    opacity:0.35;
+    background:none;
+    border:none;
+    color:#aaa;
+}
+
+/* Glow */
+.finalGlow{
+    animation:glow 3s infinite alternate;
+}
+
+@keyframes glow{
+    from{text-shadow:0 0 5px white;}
+    to{text-shadow:0 0 20px #ff4f9a;}
+}
+
+/* Stars */
+.star{
+    position:absolute;
+    width:2px;
+    height:2px;
+    background:white;
+    border-radius:50%;
+    opacity:0.4;
+    animation:float 8s linear infinite, twinkle 2s infinite alternate;
+}
+
+@keyframes float{
+    from{transform:translateY(100vh);}
+    to{transform:translateY(-10vh);}
+}
+
+@keyframes twinkle{
+    from{opacity:0.2;}
+    to{opacity:1;}
+}
+
+/* Shake */
+.shake{
+    animation:shake 0.4s;
+}
+
+@keyframes shake{
+    0%{transform:translate(0,0);}
+    25%{transform:translate(-6px,0);}
+    50%{transform:translate(6px,0);}
+    75%{transform:translate(-6px,0);}
+    100%{transform:translate(0,0);}
+}
+
+/* NPC box */
+.npcBox{
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#1a1a1a;
+    border:3px solid #ff4f9a;
+    padding:14px 20px;
+    max-width:80%;
+    font-size:12px;
+    text-align:center;
+}
+
+/* Hidden cards */
+.card{
+    position:fixed;
+    width:20px;
+    height:28px;
+    background:white;
+    border:2px solid #ff4f9a;
+    border-radius:4px;
+    cursor:pointer;
+    font-size:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#ff4f9a;
+    opacity:0.4;
+}
+.card:hover{opacity:1;}
+</style>
+</head>
+
+<body>
+
+<div id="progressBar"></div>
+
+<!-- Screens -->
+<div class="screen active" id="screen1">
+<h1 id="text1"></h1>
+<button onclick="nextScreen(2)">Begin Quest</button>
+</div>
+
+<div class="screen" id="screen2">
+<h1 id="text2"></h1>
+<div>
+<button onclick="chooseVirtue(this)">Wisdom</button>
+<button onclick="chooseVirtue(this)">Loyalty</button>
+<button onclick="chooseVirtue(this)">Kindness</button>
+</div>
+</div>
+
+<div class="screen" id="screen3">
+<h1 id="text3"></h1>
+<button onclick="nextScreen(4)">Continue</button>
+</div>
+
+<div class="screen" id="screen4">
+<h1 id="text4"></h1>
+<button onclick="prepareReveal()">Continue</button>
+</div>
+
+<div class="screen" id="loadingScreen">
+<h1 id="loadingText"></h1>
+</div>
+
+<div class="screen" id="finalScreen">
+<h1 id="finalText" class="finalGlow"></h1>
+<button id="yesBtn" class="yesButton" onclick="celebrate()">YES ❤️</button>
+<button id="noBtn" class="tinyNo" onclick="declineQuest()">no</button>
+</div>
+
+<script>
+let current=1;
+
+/* typing */
+function typeText(id,text,speed=40){
+ let i=0,el=document.getElementById(id);
+ el.innerHTML="";
+ let inter=setInterval(()=>{
+  if(i<text.length){el.innerHTML+=text.charAt(i);i++;}
+  else clearInterval(inter);
+ },speed);
+}
+
+/* progress */
+function updateProgress(){
+ document.getElementById("progressBar").style.width=(current/5)*100+"%";
+}
+
+/* navigation */
+function nextScreen(n){
+ document.getElementById("screen"+current).classList.remove("active");
+ current=n;
+ document.getElementById("screen"+current).classList.add("active");
+ updateProgress();
+ loadText();
+}
+
+/* text per screen */
+function loadText(){
+ if(current===1)
+  typeText("text1","A sacred quest begins...");
+ if(current===2)
+  typeText("text2","Choose one virtue:");
+ if(current===3)
+  typeText("text3","Your choice shapes destiny.");
+ if(current===4)
+  typeText("text4","One final question remains...");
+}
+
+/* choice */
+function chooseVirtue(btn){
+ btn.parentElement.querySelectorAll("button")
+    .forEach(b=>b.disabled=true);
+ btn.style.background="#4CAF50";
+ setTimeout(()=>nextScreen(3),1000);
+}
+
+/* reveal */
+function prepareReveal(){
+ document.getElementById("screen4").classList.remove("active");
+ document.getElementById("loadingScreen").classList.add("active");
+ typeText("loadingText",
+ "Aligning stars...\nPress ENTER to reveal.",40);
+ document.addEventListener("keydown",revealFinal);
+}
+
+function revealFinal(e){
+ if(e.key==="Enter"){
+  document.removeEventListener("keydown",revealFinal);
+  document.getElementById("loadingScreen").classList.remove("active");
+  document.getElementById("finalScreen").classList.add("active");
+
+  document.body.classList.add("shake");
+  setTimeout(()=>document.body.classList.remove("shake"),400);
+
+  typeText("finalText",
+   "Will you become our Godparents? 💍",50);
+
+  showNPC("NPC: Heroes... destiny awaits!");
+ }
+}
+
+/* npc */
+function showNPC(text){
+ let box=document.createElement("div");
+ box.className="npcBox";
+ box.innerText=text;
+ document.body.appendChild(box);
+ setTimeout(()=>box.remove(),5000);
+}
+
+/* yes */
+function celebrate(){
+ document.getElementById("yesBtn").style.display="none";
+ document.getElementById("noBtn").style.display="none";
+
+ typeText("finalText",
+ "🏆 QUEST COMPLETED 🏆\nAchievement Unlocked:\nGuardians of Love 💖",40);
+
+ heartBurst();
+ showNPC("NPC: A new family bond is formed!");
+}
+
+/* no */
+function declineQuest(){
+ document.getElementById("yesBtn").style.display="none";
+ document.getElementById("noBtn").style.display="none";
+
+ typeText("finalText",
+ "Nice try 😄\nDestiny already chose you!\nQUEST ACCEPTED!",40);
+}
+
+/* hearts */
+function heartBurst(){
+ for(let i=0;i<80;i++){
+  let h=document.createElement("div");
+  h.innerText="❤";
+  h.style.position="fixed";
+  h.style.left="50vw";
+  h.style.top="50vh";
+  h.style.color=["#ff4f9a","#ffd966","#6effb8"][Math.floor(Math.random()*3)];
+  h.style.fontSize="16px";
+  document.body.appendChild(h);
+
+  let a=Math.random()*2*Math.PI,
+      v=2+Math.random()*4,x=0,y=0;
+
+  let anim=setInterval(()=>{
+   x+=Math.cos(a)*v;
+   y+=Math.sin(a)*v+1;
+   h.style.transform=`translate(${x}px,${y}px)`;
+   v*=0.95;
+   if(y>600){clearInterval(anim);h.remove();}
+  },16);
+ }
+}
+
+/* stars */
+for(let i=0;i<50;i++){
+ let s=document.createElement("div");
+ s.className="star";
+ s.style.left=Math.random()*100+"vw";
+ s.style.animationDuration=(4+Math.random()*6)+"s";
+ document.body.appendChild(s);
+}
+
+/* hidden cards */
+function createCards(){
+ for(let i=0;i<3;i++){
+  let c=document.createElement("div");
+  c.className="card";
+  c.innerText="♥";
+  c.style.left=Math.random()*90+"vw";
+  c.style.top=Math.random()*80+"vh";
+  c.onclick=()=>alert("Secret unlocked!\n\nCalin câștigă!");
+  document.body.appendChild(c);
+ }
+}
+
+loadText();
+createCards();
+</script>
+
+</body>
+</html>
